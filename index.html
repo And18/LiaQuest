@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Sorpresa per Lia</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+    body { background-color: #181818; color: white; font-family: 'Poppins', sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+    .hidden { display: none; }
+    .center { text-align: center; margin: 20px; }
+    input[type="text"], button { padding: 10px; border-radius: 5px; margin-top: 20px; }
+    button { background-color: #FF6347; color: white; border: none; cursor: pointer; font-weight: 600; transition: background-color 0.3s; }
+    button:hover { background-color: #FF4500; }
+
+    @keyframes slideInFromRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOutToLeft {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(-100%);
+            opacity: 0;
+        }
+    }
+
+    .slide-in {
+        animation: slideInFromRight 0.5s ease-out forwards;
+    }
+
+    .slide-out {
+        animation: slideOutToLeft 0.5s ease-out forwards;
+    }
+</style>
+</head>
+<body>
+
+<div id="countdown" class="center"></div>
+
+<div id="messaggio">
+    <h1>Ciao Amore</h1>
+    <button onclick="mostraCoordinate()">Sono pronta</button>
+</div>
+
+<div id="coordinate" class="center hidden">
+    <p>45°26'28.5"N 12°19'20.1"E</p>
+    <button onclick="iniziaDomande()">Ok, sono qui</button>
+</div>
+
+<div id="domande" class="hidden"></div>
+
+<div id="indicazioni" class="center hidden"></div> <!-- Container per le indicazioni -->
+
+<script>
+    const fineCountdown = new Date("February 15, 2024 11:50:00").getTime();
+    const x = setInterval(function() {
+        const ora = new Date().getTime();
+        const distanza = fineCountdown - ora;
+        const giorni = Math.floor(distanza / (1000 * 60 * 60 * 24));
+        const ore = Math.floor((distanza % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minuti = Math.floor((distanza % (1000 * 60 * 60)) / (1000 * 60));
+        const secondi = Math.floor((distanza % (1000 * 60)) / 1000);
+
+        document.getElementById("countdown").innerHTML = giorni + "g " + ore + "h " + minuti + "m " + secondi + "s ";
+
+        if (distanza < 0) {
+            clearInterval(x);
+            document.getElementById("countdown").style.display = "none";
+            document.getElementById("messaggio").classList.remove('hidden');
+        }
+    }, 1000);
+
+    let indiceDomanda = 0;
+    const domande = [
+        { testo: "[...] and you don't stop <br> a rock it to the <br> ____ ____ boogie", risposta: "bang bang", indicazioni: "Attraversa Ponte degli Scalzi", suggerimento: "Mi rifiuto di darti un suggerimento qui."  },
+        { testo: "Compagnia ferroviara dove c'è <br> stato il primo bacio", risposta: "transpennine express", indicazioni: "DX - SX - DX - SX - <br>DX - DX - SX - <br>SX - DX - (poi dritto fino al fiume).", suggerimento: "2 parole (tante lettere)" },
+        { testo: "Sono un eroe maestoso, con un <i>occhio</i> da cui calore sgorga,<br>non per vedere, ma il suo fuoco internamente alberga.<br>In cerca della mia casa, umida e nascosta,<br>Chi sono, se non il figlio di Zeus, nella mitologia accosta?", risposta: "hercules", indicazioni: "Sotto l'occhio del Leone Alato, poi, oltre il fiume, vai dove Pietro attende", suggerimento: "Zeus + Hera" },
+        { testo: "Il tuo <i>dolce</i> preferito", risposta: "sugarboy", indicazioni : "Guardiano in pietra, al tuo sguardo mi affido,<br>Verso la fontana che danza, il mio passo guido.", suggerimento: "s____b_y" },
+    ];
+
+    function mostraCoordinate() {
+        document.getElementById("messaggio").classList.add('hidden');
+        document.getElementById("coordinate").classList.remove('hidden');
+    }
+
+    function iniziaDomande() {
+        document.getElementById("coordinate").classList.add('hidden');
+        mostraDomanda(0); // Inizia con la prima domanda
+    }
+
+    function mostraDomande() {
+        document.getElementById("messaggio").classList.add('hidden');
+        mostraDomanda(indiceDomanda);
+    }
+
+    function mostraDomanda(indice) {
+        const containerDomande = document.getElementById("domande");
+        containerDomande.innerHTML = `
+            <div class="center slide-in">${domande[indice].testo}</div>
+            <input type="text" id="risposta" class="slide-in">
+            <button onclick="controllaRisposta()" class="slide-in">Invia</button>
+            <button onclick="domandaPrecedente()" class="slide-in">Indietro</button>
+            <p id="errore" class="center hidden" style="color: red;"></p>
+        `;
+        containerDomande.classList.remove('hidden');
+    }
+
+    function controllaRisposta() {
+        const rispostaUtente = document.getElementById("risposta").value.toLowerCase();
+        const rispostaCorretta = domande[indiceDomanda].risposta.toLowerCase();
+        if (rispostaUtente === rispostaCorretta) {
+            document.getElementById("errore").classList.add('hidden');
+
+            // Se l'utente è all'ultima domanda, mostra prima le indicazioni, poi il messaggio finale
+            if (indiceDomanda === domande.length - 1) {
+                document.getElementById("indicazioni").innerHTML = `
+                    <div class="slide-in">${domande[indiceDomanda].indicazioni}</div>
+                    <button onclick="mostraMessaggioFinale()" class="slide-in">Sono arrivata, e ora?</button>
+                `;
+                document.getElementById("indicazioni").classList.remove('hidden');
+            } else {
+                // Altrimenti, procedi come prima
+                document.getElementById("domande").classList.add('hidden');
+                document.getElementById("indicazioni").innerHTML = `
+                    <div class="slide-in">${domande[indiceDomanda].indicazioni}</div>
+                    <button onclick="prossimaDomanda()" class="slide-in">Sono arrivata, e ora?</button>
+                `;
+                document.getElementById("indicazioni").classList.remove('hidden'); 
+            }
+        } else {
+            document.getElementById("errore").innerHTML = domande[indiceDomanda].suggerimento;
+            document.getElementById("errore").classList.remove('hidden');
+        }
+    }
+
+function mostraMessaggioFinale() {
+    document.getElementById("indicazioni").innerHTML = "<div class='slide-in'>Baciami ❤</div>";
+    // Qui puoi decidere se nascondere o meno il bottone dopo che il messaggio finale è stato mostrato
+}
+
+
+
+    function prossimaDomanda() {
+        document.getElementById("indicazioni").classList.add('hidden'); // Nascondi le indicazioni
+        if (indiceDomanda < domande.length - 1) {
+            indiceDomanda++;
+            mostraDomanda(indiceDomanda); // Prepara e mostra la prossima domanda
+        } else {
+            document.getElementById("domande").innerHTML = "<div class='slide-in'>Hai completato l'avventura! 🎉</div>";
+            document.getElementById("domande").classList.remove('hidden');
+        }
+    }
+
+
+
+    function domandaPrecedente() {
+        if (indiceDomanda > 0) {
+            indiceDomanda--;
+            mostraDomanda(indiceDomanda);
+        }
+    }
+</script>
+
+</body>
+</html>
