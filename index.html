@@ -47,9 +47,9 @@
 
 <div id="countdown" class="center"></div>
 
-<div id="messaggio">
+<div id="messaggio" class="hidden">
     <h1>Ciao Amore</h1>
-    <button onclick="mostraCoordinate()">Sono pronta</button>
+    <button onclick="mostraCoordinate()">Iniziamo!</button>
 </div>
 
 <div id="coordinate" class="center hidden">
@@ -62,7 +62,7 @@
 <div id="indicazioni" class="center hidden"></div> <!-- Container per le indicazioni -->
 
 <script>
-    const fineCountdown = new Date("February 17, 2024 11:50:00").getTime();
+    const fineCountdown = new Date("February 17, 2024 11:55:00").getTime();
     const x = setInterval(function() {
         const ora = new Date().getTime();
         const distanza = fineCountdown - ora;
@@ -76,7 +76,8 @@
         if (distanza < 0) {
             clearInterval(x);
             document.getElementById("countdown").style.display = "none";
-            document.getElementById("messaggio").classList.remove('hidden');
+            // Mostra il messaggio iniziale e nasconde il countdown
+            document.getElementById("messaggio").classList.remove('hidden')
         }
     }, 1000);
 
